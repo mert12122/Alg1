@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two-Step Equation Task Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #f5f4f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .title-block { }
+  .title-block .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888780;
+    margin-bottom: 2px;
+  }
+  .title-block .heading {
+    font-size: 17px;
+    font-weight: 800;
+    color: #2C2C2A;
+  }
+
+  .counter {
+    font-size: 13px;
+    font-weight: 700;
+    color: #888780;
+    background: #fff;
+    border: 0.5px solid #D3D1C7;
+    border-radius: 20px;
+    padding: 5px 14px;
+  }
+
+  /* Progress dots */
+  .dots {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #D3D1C7;
+    transition: background 0.25s, transform 0.2s;
+    cursor: pointer;
+  }
+  .dot.done { background: #1D9E75; }
+  .dot.current { background: #378ADD; transform: scale(1.3); }
+
+  /* Card */
+  .card {
+    background: #fff;
+    border: 0.5px solid #D3D1C7;
+    border-radius: 18px;
+    padding: 28px 28px 22px;
+    margin-bottom: 1rem;
+    animation: cardIn 0.22s ease;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #B4B2A9;
+    margin-bottom: 16px;
+  }
+
+  .equation {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: #2C2C2A;
+    text-align: center;
+    background: #f5f4f0;
+    border-radius: 12px;
+    padding: 20px 16px;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+  }
+
+  .prompt {
+    font-size: 13px;
+    color: #888780;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .answer-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .var-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    font-weight: 500;
+    color: #2C2C2A;
+    white-space: nowrap;
+  }
+
+  .ans-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #D3D1C7;
+    background: #fff;
+    color: #2C2C2A;
+    width: 110px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .ans-input:focus { border-color: #378ADD; }
+  .ans-input.ok  { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .ans-input.no  { border-color: #E24B4A; background: #FCEBEB; color: #791F1F; }
+
+  .check-btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #2C2C2A;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .check-btn:hover { background: #444441; }
+  .check-btn:active { transform: scale(0.97); }
+  .check-btn:disabled { background: #1D9E75; cursor: default; }
+
+  .feedback {
+    font-size: 13px;
+    margin-top: 12px;
+    line-height: 1.5;
+    min-height: 18px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: #E1F5EE; color: #0F6E56; }
+  .feedback.no { background: #FCEBEB; color: #A32D2D; }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .nav-btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 1.5px solid #D3D1C7;
+    background: #fff;
+    color: #444441;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, transform 0.1s;
+  }
+  .nav-btn:hover { background: #f5f4f0; border-color: #B4B2A9; }
+  .nav-btn:active { transform: scale(0.97); }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+
+  .score-pill {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2C2C2A;
+    background: #fff;
+    border: 0.5px solid #D3D1C7;
+    border-radius: 20px;
+    padding: 6px 16px;
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .complete-banner {
+    display: none;
+    text-align: center;
+    margin-top: 1rem;
+    padding: 16px;
+    background: #E1F5EE;
+    border-radius: 12px;
+    border: 0.5px solid #5DCAA5;
+  }
+  .complete-banner.show { display: block; }
+  .complete-banner p { font-size: 15px; font-weight: 700; color: #0F6E56; margin-bottom: 4px; }
+  .complete-banner span { font-size: 13px; color: #1D9E75; }
+
+  .retry-btn {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 10px;
+    padding: 7px 18px;
+    border-radius: 8px;
+    border: 1px solid #1D9E75;
+    background: transparent;
+    color: #0F6E56;
+    cursor: pointer;
+  }
+  .retry-btn:hover { background: #E1F5EE; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="topbar">
+    <div class="title-block">
+      <div class="label">Task cards &mdash; 8th grade</div>
+      <div class="heading">Two-step equations</div>
+    </div>
+    <div class="counter" id="counter">1 of 10</div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="card" id="card">
+    <div class="card-num" id="card-num">Card 1</div>
+    <div class="equation" id="equation"></div>
+    <div class="prompt">Solve for the variable. Enter your answer as a number or fraction (e.g. <span style="font-family:'DM Mono',monospace">3</span> or <span style="font-family:'DM Mono',monospace">-1/2</span>).</div>
+    <div class="answer-row">
+      <div class="var-label" id="var-label">x =</div>
+      <input class="ans-input" id="ans-input" type="text" placeholder="?" autocomplete="off" />
+      <button class="check-btn" id="check-btn">Check</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prev-btn" disabled>&larr; Prev</button>
+    <div class="score-pill" id="score-pill">0 / 10</div>
+    <button class="nav-btn" id="next-btn">Next &rarr;</button>
+  </div>
+
+  <div class="complete-banner" id="complete-banner">
+    <p id="banner-msg"></p>
+    <span id="banner-sub"></span><br>
+    <button class="retry-btn" id="retry-btn">Try again</button>
+  </div>
+</div>
+
+<script>
+var problems = [
+  { eq: "2x + 5 = 13",      variable: "x", answers: ["4"],     hint: "Subtract 5 from both sides, then divide by 2." },
+  { eq: "3n − 7 = −1",      variable: "n", answers: ["2"],     hint: "Add 7 to both sides, then divide by 3." },
+  { eq: "−4y + 3 = 19",     variable: "y", answers: ["-4"],    hint: "Subtract 3, then divide by −4. Watch the sign!" },
+  { eq: "½x − 2 = 4",       variable: "x", answers: ["12"],    hint: "Add 2 to both sides, then multiply by 2." },
+  { eq: "5m + 12 = −3",     variable: "m", answers: ["-3"],    hint: "Subtract 12, then divide by 5." },
+  { eq: "−3k − 4 = 11",     variable: "k", answers: ["-5"],    hint: "Add 4 to both sides, then divide by −3." },
+  { eq: "⅓p + 6 = 2",       variable: "p", answers: ["-12"],   hint: "Subtract 6, then multiply by 3." },
+  { eq: "7 − 2t = −5",      variable: "t", answers: ["6"],     hint: "Subtract 7 from both sides, then divide by −2." },
+  { eq: "−½w + 3 = 7",      variable: "w", answers: ["-8"],    hint: "Subtract 3, then multiply by −2. Check your sign." },
+  { eq: "4q − ¾ = 5¼",      variable: "q", answers: ["3/2", "1.5", "1½"], hint: "Add ¾ to both sides to get 4q = 6, then divide by 4." }
+];
+
+var cur = 0;
+var solved = new Array(problems.length).fill(false);
+var tried  = new Array(problems.length).fill(false);
+
+function norm(s) {
+  return s.toLowerCase().replace(/\s+/g, "").replace(/\$/g, "");
+}
+
+function renderDots() {
+  var d = document.getElementById("dots");
+  d.innerHTML = "";
+  for (var i = 0; i < problems.length; i++) {
+    var dot = document.createElement("div");
+    dot.className = "dot" + (solved[i] ? " done" : "") + (i === cur && !solved[i] ? " current" : "");
+    (function(idx){ dot.addEventListener("click", function(){ goTo(idx); }); })(i);
+    d.appendChild(dot);
+  }
+}
+
+function renderCard() {
+  var p = problems[cur];
+  document.getElementById("counter").textContent = (cur + 1) + " of " + problems.length;
+  document.getElementById("card-num").textContent = "Card " + (cur + 1);
+  document.getElementById("equation").textContent = p.eq;
+  document.getElementById("var-label").textContent = p.variable + " =";
+
+  var inp = document.getElementById("ans-input");
+  var fb  = document.getElementById("feedback");
+  var btn = document.getElementById("check-btn");
+
+  inp.className = "ans-input";
+  fb.className  = "feedback";
+  fb.textContent = "";
+
+  if (solved[cur]) {
+    inp.value = p.answers[0];
+    inp.className = "ans-input ok";
+    inp.disabled = true;
+    btn.disabled = true;
+    fb.className = "feedback ok show";
+    fb.textContent = "Correct! Well done.";
+  } else {
+    inp.value = "";
+    inp.disabled = false;
+    btn.disabled = false;
+    if (tried[cur]) {
+      fb.className = "feedback no show";
+      fb.textContent = "Not quite. Hint: " + p.hint;
+    }
+  }
+
+  document.getElementById("prev-btn").disabled = cur === 0;
+  document.getElementById("next-btn").disabled = cur === problems.length - 1;
+
+  var scoreCount = solved.filter(Boolean).length;
+  document.getElementById("score-pill").textContent = scoreCount + " / " + problems.length;
+
+  renderDots();
+
+  var banner = document.getElementById("complete-banner");
+  if (scoreCount === problems.length) {
+    banner.className = "complete-banner show";
+    document.getElementById("banner-msg").textContent = "All 10 solved — great work!";
+    document.getElementById("banner-sub").textContent = "You completed every two-step equation.";
+  } else {
+    banner.className = "complete-banner";
+  }
+
+  inp.focus();
+}
+
+function doCheck() {
+  var inp = document.getElementById("ans-input");
+  var fb  = document.getElementById("feedback");
+  var btn = document.getElementById("check-btn");
+  var val = inp.value.trim();
+  if (!val) return;
+
+  var p = problems[cur];
+  var ok = p.answers.some(function(a) { return norm(a) === norm(val); });
+
+  tried[cur] = true;
+  if (ok) {
+    solved[cur] = true;
+    inp.className = "ans-input ok";
+    inp.disabled = true;
+    btn.disabled = true;
+    fb.className = "feedback ok show";
+    fb.textContent = "Correct! Well done.";
+  } else {
+    inp.className = "ans-input no";
+    fb.className = "feedback no show";
+    fb.textContent = "Not quite. Hint: " + p.hint;
+  }
+
+  var scoreCount = solved.filter(Boolean).length;
+  document.getElementById("score-pill").textContent = scoreCount + " / " + problems.length;
+  renderDots();
+
+  if (scoreCount === problems.length) {
+    document.getElementById("complete-banner").className = "complete-banner show";
+    document.getElementById("banner-msg").textContent = "All 10 solved — great work!";
+    document.getElementById("banner-sub").textContent = "You completed every two-step equation.";
+  }
+}
+
+function goTo(idx) {
+  cur = idx;
+  renderCard();
+}
+
+document.getElementById("prev-btn").addEventListener("click", function() { if (cur > 0) goTo(cur - 1); });
+document.getElementById("next-btn").addEventListener("click", function() { if (cur < problems.length - 1) goTo(cur + 1); });
+document.getElementById("check-btn").addEventListener("click", doCheck);
+document.getElementById("ans-input").addEventListener("keydown", function(e) { if (e.key === "Enter") doCheck(); });
+document.getElementById("retry-btn").addEventListener("click", function() {
+  solved = new Array(problems.length).fill(false);
+  tried  = new Array(problems.length).fill(false);
+  cur = 0;
+  document.getElementById("complete-banner").className = "complete-banner";
+  renderCard();
+});
+
+renderCard();
+</script>
+</body>
+</html>
